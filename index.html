@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Diagram Generator | Visual Studio Code</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-project-diagram"></i>
+                    <h1>Text to Diagram</h1>
+                </div>
+                <div class="subtitle">Transform plain text into beautiful diagrams</div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="theme-toggle">
+                    <i class="fas fa-moon"></i> Dark Mode
+                </button>
+                <button class="btn btn-primary" id="vscode-info">
+                    <i class="fas fa-code"></i> Running in VS Code
+                </button>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <!-- Left Panel: Text Input -->
+            <section class="input-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-edit"></i> Text Input</h2>
+                    <div class="panel-actions">
+                        <button class="btn-icon" id="clear-btn" title="Clear all">
+                            <i class="fas fa-broom"></i>
+                        </button>
+                        <button class="btn-icon" id="format-btn" title="Format text">
+                            <i class="fas fa-align-left"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="input-area">
+                    <div class="input-toolbar">
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" data-insert="flowchart">
+                                <i class="fas fa-sitemap"></i> Flowchart
+                            </button>
+                            <button class="toolbar-btn" data-insert="sequence">
+                                <i class="fas fa-exchange-alt"></i> Sequence
+                            </button>
+                            <button class="toolbar-btn" data-insert="class">
+                                <i class="fas fa-cube"></i> Class Diagram
+                            </button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" data-insert="pie">
+                                <i class="fas fa-chart-pie"></i> Pie Chart
+                            </button>
+                            <button class="toolbar-btn" data-insert="gantt">
+                                <i class="fas fa-tasks"></i> Gantt Chart
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <textarea id="text-input" placeholder="Enter your diagram text here... 
+Example for flowchart:
+graph TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Process 1]
+    B -->|No| D[Process 2]
+    C --> E[End]
+    D --> E
+
+Example for sequence diagram:
+sequenceDiagram
+    participant A as User
+    participant B as Server
+    A->>B: Login Request
+    B-->>A: Login Response
+    A->>B: Get Data
+    B-->>A: Return Data"></textarea>
+                    
+                    <div class="input-footer">
+                        <div class="char-count">
+                            <span id="char-count">0</span> characters
+                        </div>
+                        <div class="input-actions">
+                            <button class="btn btn-outline" id="load-example">
+                                <i class="fas fa-download"></i> Load Example
+                            </button>
+                            <button class="btn btn-primary" id="generate-btn">
+                                <i class="fas fa-magic"></i> Generate Diagram
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="syntax-help">
+                    <div class="help-header">
+                        <h3><i class="fas fa-question-circle"></i> Syntax Help</h3>
+                        <button class="btn-icon" id="toggle-help">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="help-content" id="help-content">
+                        <p>This tool supports <strong>Mermaid.js</strong> syntax. Common diagram types:</p>
+                        <ul>
+                            <li><strong>Flowchart:</strong> graph TD or graph LR</li>
+                            <li><strong>Sequence Diagram:</strong> sequenceDiagram</li>
+                            <li><strong>Class Diagram:</strong> classDiagram</li>
+                            <li><strong>Pie Chart:</strong> pie title Chart Title</li>
+                            <li><strong>Gantt Chart:</strong> gantt</li>
+                        </ul>
+                        <p>Click the buttons above to insert templates.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Diagram Output -->
+            <section class="output-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-chart-line"></i> Diagram Output</h2>
+                    <div class="panel-actions">
+                        <select id="diagram-type">
+                            <option value="auto">Auto Detect</option>
+                            <option value="flowchart">Flowchart</option>
+                            <option value="sequence">Sequence Diagram</option>
+                            <option value="class">Class Diagram</option>
+                            <option value="state">State Diagram</option>
+                            <option value="pie">Pie Chart</option>
+                            <option value="gantt">Gantt Chart</option>
+                        </select>
+                        <button class="btn-icon" id="export-btn" title="Export diagram">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="btn-icon" id="fullscreen-btn" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="output-area">
+                    <div class="diagram-container" id="diagram-container">
+                        <div class="diagram-placeholder">
+                            <i class="fas fa-project-diagram"></i>
+                            <h3>Your diagram will appear here</h3>
+                            <p>Enter text in the left panel and click "Generate Diagram"</p>
+                        </div>
+                    </div>
+                    
+                    <div class="output-footer">
+                        <div class="status-indicator">
+                            <div class="status-dot" id="status-dot"></div>
+                            <span id="status-text">Ready</span>
+                        </div>
+                        <div class="output-actions">
+                            <button class="btn btn-outline" id="copy-btn">
+                                <i class="fas fa-copy"></i> Copy Code
+                            </button>
+                            <button class="btn btn-secondary" id="save-btn">
+                                <i class="fas fa-save"></i> Save as Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="output-info">
+                    <div class="info-header">
+                        <h3><i class="fas fa-info-circle"></i> Diagram Information</h3>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-item">
+                            <span class="info-label">Diagram Type:</span>
+                            <span id="detected-type">Not detected</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Elements:</span>
+                            <span id="element-count">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Last Generated:</span>
+                            <span id="last-generated">Never</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>Text to Diagram App | Designed for Visual Studio Code</p>
+                </div>
+                <div class="footer-right">
+                    <p>Powered by <strong>Mermaid.js</strong> | <span id="current-date"></span></p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-download"></i> Export Diagram</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <div class="export-option">
+                        <input type="radio" id="export-png" name="export-format" value="png" checked>
+                        <label for="export-png">
+                            <i class="fas fa-file-image"></i>
+                            <div>
+                                <strong>PNG Image</strong>
+                                <p>High quality raster image</p>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="export-option">
+                        <input type="radio" id="export-svg" name="export-format" value="svg">
+                        <label for="export-svg">
+                            <i class="fas fa-file-code"></i>
+                            <div>
+                                <strong>SVG Vector</strong>
+                                <p>Scalable vector graphic</p>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="export-option">
+                        <input type="radio" id="export-pdf" name="export-format" value="pdf">
+                        <label for="export-pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            <div>
+                                <strong>PDF Document</strong>
+                                <p>Printable document format</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-outline close-modal">Cancel</button>
+                    <button class="btn btn-primary" id="export-confirm">Export</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="diagram-generator.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
